@@ -25,10 +25,15 @@ export const Container = styled.div<ContainerProps>`
 
         & + a {
           margin-left: 32px;
+          opacity: 0.8;
         }
 
         &:hover {
-          opacity: 0.6;
+          opacity: 0.8;
+          width: 73px;
+          height: 2px;
+          top: 69px;
+          background: #ff872c;
         }
       }
     }
