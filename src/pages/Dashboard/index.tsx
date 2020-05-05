@@ -9,7 +9,6 @@ import api from '../../services/api';
 import Header from '../../components/Header';
 
 import formatValue from '../../utils/formatValue';
-import formatDate from '../../utils/formatDate';
 
 import { Container, CardContainer, Card, TableContainer } from './styles';
 
@@ -39,21 +38,26 @@ const Dashboard: React.FC = () => {
       // pegando as transacoes do back
       const res = await api.get('/transactions');
 
-      // formatando as datas
-      res.data.transactions.map((transaction: Transaction) => {
-        const formats = {
+      // formatando as transações
+      const transactionsFormatted = res.data.transactions.map(
+        (transaction: Transaction) => ({
+          ...transaction,
           formattedValue: formatValue(transaction.value),
-          formattedDate: formatDate(transaction.created_at),
-        };
-        return Object.assign(transaction, formats);
-      });
-      // inserindo transacoes e balance formatados.
-      setTransactions(res.data.transactions);
-      setBalance({
-        income: formatValue(parseFloat(res.data.balance.income)),
-        outcome: formatValue(parseFloat(res.data.balance.outcome)),
-        total: formatValue(parseFloat(res.data.balance.total)),
-      });
+          formattedDate: new Date(transaction.created_at).toLocaleDateString(
+            'pt-br',
+          ),
+        }),
+      );
+
+      // formatando os valores
+      const balanceFormatted = {
+        income: formatValue(res.data.balance.income),
+        outcome: formatValue(res.data.balance.outcome),
+        total: formatValue(res.data.balance.total),
+      };
+
+      setTransactions(transactionsFormatted);
+      setBalance(balanceFormatted);
     }
 
     loadTransactions();
@@ -99,23 +103,20 @@ const Dashboard: React.FC = () => {
             </thead>
 
             <tbody>
-              {transactions.map(transaction => {
-                return (
-                  <tr key={transaction.id}>
-                    <td className="title">{transaction.title}</td>
-                    {transaction.type === 'income' && (
-                      <td className="income">{transaction.formattedValue}</td>
-                    )}
-                    {transaction.type === 'outcome' && (
-                      <td className="outcome">
-                        {`- ${transaction.formattedValue}`}
-                      </td>
-                    )}
-                    <td className="title">{transaction.category.title}</td>
-                    <td>{transaction.formattedDate}</td>
-                  </tr>
-                );
-              })}
+              {transactions.map(transaction => (
+                <tr key={transaction.id}>
+                  <td className="title">{transaction.title}</td>
+                  {
+                    // aqui será realizada uma verificação do tipo, conforme solicitado no design da aplicação.
+                  }
+                  <td className={transaction.type}>
+                    {transaction.type === 'outcome' && '- '}
+                    {transaction.formattedValue}
+                  </td>
+                  <td className="title">{transaction.category.title}</td>
+                  <td>{transaction.formattedDate}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </TableContainer>
